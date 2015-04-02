@@ -40,7 +40,7 @@ def punycode(address):
     @return  :str         The IDN address in punycode
     '''
     import encodings.punycode
-    return encodings.punycode.punycode_encode(address).rstrip('-')
+    return encodings.punycode.punycode_encode(address).decode('utf-8', 'strict').rstrip('-')
 
 
 def parse_url(url, fallback_scheme):
@@ -107,7 +107,7 @@ def parse_url(url, fallback_scheme):
     return rc
 
 
-def construct_url(scheme, user, password, domain, port, path, query_string, fragment_id, *, **extras):
+def construct_url(scheme, user, password, domain, port, path, query_string, fragment_id, **extras):
     '''
     Construct an URL string
     
