@@ -36,13 +36,72 @@ def punycode(address): # TODO
     return address
 
 
-def parse_url(): # TODO
-    pass
+def parse_url(url, fallback_scheme):
+    '''
+    Parse an URL string
+    
+    This function supports generic syntax and gopher
+    
+    @param   url:str              The URL string
+    @param   fallback_scheme:str  The scheme to assume the URL uses if
+                                  the URL string does not contain any
+    @return  :dict<str, ¿V?>      Parameters from `construct_url`, `**extras` in
+                                  `construct_url` is unioned with the other parameters,
+                                  omitted parameters are not included
+    '''
+    rc = {}
+    scheme = fallback_scheme
+    if '://' in url:
+        parts = url.split('://')
+        scheme, url = parts[0], '://'.join(parts[1:])
+        rc['scheme'] = scheme
+    if '?' in url:
+        parts = url.split('?')
+        url, query = parts[0], '?'.join(parts[1:])
+        parts = query.split('#')
+        query, url = parts[0], url + '#'.join(parts[1:])
+        rc['query_string'] = query_string
+    if '#' in url:
+        parts = url.split('#')
+        url, fragment = parts[0], '#'.join(parts[1:])
+        rc['fragment_id'] = fragment
+    if '/' in url:
+        parts = url.split('/')
+        url, path = parts[0], '/'.join(parts[1:])
+        if (scheme == 'gopher') and (not path == ''):
+            item_type, path = path[0], path[1:]
+            rc['item_type'] = item_type
+        rc['path'] = '/' + path
+    if '@' in url:
+        parts = url.split('@')
+        login, url = parts[0], '@'.join(parts[1:])
+        parts = login.split(':')
+        user, password = parts[0], ':'.join(parts[1:])
+        if not user == '':
+            rc['user'] = user
+        if not password == '':
+            rc['password'] = password
+    if '[' in url:
+        url = url.replace('[', '')
+        parts = url.split(']')
+        domain, url = parts[0], ']'.join(parts[1:])
+    elif ':' in url:
+        parts = url.split(':')
+        domain, url = parts[0], ':'.join(parts[1:])
+    else:
+        domain, url = url, ''
+    rc['domain'] = domain
+    if not url == '':
+        try:
+            rc['port'] = int(port)
+        except:
+            rc['port'] = port
+    return rc
 
 
 def construct_url(scheme, user, password, domain, port, path, query_string, fragment_id, *, **extras):
     '''
-    Construct an URL
+    Construct an URL string
     
     This function supports generic syntax and gopher
     
@@ -75,18 +134,22 @@ def construct_url(scheme, user, password, domain, port, path, query_string, frag
         if query_string is not None and c not in '&=':  query_string = query_string.replace(c, cc)
         if fragment_id  is not None:                    fragment_id  = fragment_id .replace(c, cc)
         if item_type    is not None:                    item_type    = item_type   .replace(c, cc)
-    string = ''
+    url = ''
     while '//' in path:
         path = path.replace('//', '/')
-    if scheme       is not None:  string += scheme + '://'
-    if user         is not None:  string += user
-    if password     is not None:  string += ':' + password
+    if scheme       is not None:  url += scheme + '://'
+    if user         is not None:  url += user
+    if password     is not None:  url += ':' + password
     if user is not None or password is not None:
-        string += '@'
-    if domain       is not None:  string += '[%s]' % domain if ':' in domain else domain
-    if port         is not None:  string += ':%i' % port
-    if path         is not None:  string += '/' + ('' if item_type is None else item_type) + path.lstrip('/')
-    if query_string is not None:  string += '?' + query_string
-    if fragment_id  is not None:  string += '#' + fragment_id
-    return ''.join(chr(c) if c < 128 else ('%02x' % c) for c in string.encode('utf-8'))
+        url += '@'
+    if domain       is not None:  url += '[%s]' % domain if ':' in domain else domain
+    if port         is not None:  url += ':%i' % port
+    if path         is not None:  url += '/' + ('' if item_type is None else item_type) + path.lstrip('/')
+    if query_string is not None:  url += '?' + query_string
+    if fragment_id  is not None:  url += '#' + fragment_id
+    return ''.join(chr(c) if c < 128 else ('%02x' % c) for c in url.encode('utf-8'))
+
+
+def url_unescape(text): # TODO
+    return text
 
