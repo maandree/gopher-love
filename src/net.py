@@ -150,6 +150,25 @@ def construct_url(scheme, user, password, domain, port, path, query_string, frag
     return ''.join(chr(c) if c < 128 else ('%02x' % c) for c in url.encode('utf-8'))
 
 
-def url_unescape(text): # TODO
-    return text
+def url_unescape(text):
+    '''
+    Unescape a %-escaped string in an URL
+    
+    @param   text:str  The %-escaped string
+    @return  :str      The string, unescaped
+    '''
+    buf, esc, a, b = [], False, None, None
+    for c in text:
+        if esc:
+            if a is None:
+                a = c
+            else:
+                esc = False
+                b = c
+                buf.append(int(a + b, 16))
+        elif c == '%':
+            esc, a, b = True, None, None
+        else:
+            buf.append(ord(c))
+    return bytes(buf).decode('utf-8', 'strict')
 
