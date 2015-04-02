@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import os, sys
 
+from argparser import *
+
 from net import *
 
 
@@ -46,6 +48,12 @@ config_file = None
 '''
 :str?  The configuration file
 '''
+
+config_opts = None
+'''
+:list<str>  Options passed to the configuration script
+'''
+
 
 
 ## Set process title
@@ -79,6 +87,38 @@ def setproctitle(title):
 setproctitle(sys.argv[0])
 
 
+## Read command line arguments
+parser = ArgParser('An extensible gopher browser',
+                   sys.argv[0] + ' [options] [-- configuration-options]',
+                   None, None, True, ArgParser.standard_abbreviations())
+
+parser.add_argumented(['-c', '--configurations'], 0, 'FILE', 'Select configuration file')
+parser.add_argumentless(['-h', '-?', '--help'], 0, 'Print this help information')
+parser.add_argumentless(['-C', '--copying', '--copyright'], 0, 'Print copyright information')
+parser.add_argumentless(['-W', '--warranty'], 0, 'Print non-warranty information')
+parser.add_argumentless(['-v', '--version'], 0, 'Print program name and version')
+
+parser.parse()
+parser.support_alternatives()
+
+if parser.opts['--help'] is not None:
+    parser.help()
+    sys.exit(0)
+elif parser.opts['--copyright'] is not None:
+    print(copyright[1 : -1])
+    sys.exit(0)
+elif parser.opts['--warranty'] is not None:
+    print(copyright.split('\n\n')[2])
+    sys.exit(0)
+elif parser.opts['--version'] is not None:
+    print('%s %s' % (PROGRAM_NAME, PROGRAM_VERSION))
+    sys.exit(0)
+
+a = lambda opt : opt[0] if opt is not None else None
+config_file = a(parser.opts['--configurations'])
+config_opts = parser.files
+
+
 ## Load extension and configurations via gopher-loverc
 def get_config_file():
     '''
@@ -109,6 +149,7 @@ def get_config_file():
 if config_file is None:
     config_file = get_config_file()
 if config_file is not None:
+    config_opts = [config_file] + config_opts
     code = None
     with open(config_file, 'rb') as script:
         code = script.read()
