@@ -40,7 +40,10 @@ def punycode(address):
     @return  :str         The IDN address in punycode
     '''
     import encodings.punycode
-    return encodings.punycode.punycode_encode(address).decode('utf-8', 'strict').rstrip('-')
+    def partial(part):
+        puny = encodings.punycode.punycode_encode(part).decode('utf-8', 'strict').rstrip('-')
+        return ('' if puny == part else 'xn--') + puny
+    return '.'.join(partial(part) for part in address.split('.'))
 
 
 def parse_url(url, fallback_scheme):
