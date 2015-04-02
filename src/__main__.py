@@ -18,6 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 
+PROGRAM_NAME = 'gopher-love'
+'''
+:str  The name of the program
+'''
+
+PROGRAM_VERSION = 'devel'
+'''
+:str  The version of the program
+'''
+
+
 default_protocol = 'gopher'
 '''
 :str  The protocol to use when no protocol has been specified
