@@ -22,6 +22,7 @@ from argparser import *
 
 from net import *
 from config import *
+from terminal import *
 
 
 
