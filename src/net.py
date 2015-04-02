@@ -28,8 +28,8 @@ def connect(host, port, protocol = 'tcp'):
     @return  :Popen        Control object for the created instance `netcat`
     '''
     from subprocess import Popen, PIPE
-    Popen(['nc', {'tcp' : '-t', 'udp' : '-p'}[protocol.lower()], hostname, str(port)],
-          stdin = PIPE, stdout = PIPE, stderr = PIPE)
+    return Popen(['nc', {'tcp' : '-t', 'udp' : '-p'}[protocol.lower()], hostname, str(port)],
+                 stdin = PIPE, stdout = PIPE, stderr = PIPE)
 
 
 def punycode(address):
