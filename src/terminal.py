@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 
-import sys, termios
+import os, sys, termios
 
 
 def hide_cursor():
@@ -113,4 +113,56 @@ def get_terminal_size():
     '''
     import struct, fcntl
     return struct.unpack('hh', fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, '1234'))
+
+
+_terminal_input_buffer = []
+_terminal_input_fileno = sys.stdin.fileno()
+def read_terminal_input():
+    '''
+    Read a single input from the terminal
+    
+    @return  :str?  The input unit, `None` if interrupted
+    '''
+    try:
+        rc, buffer, utf8n, utf8c, esc = '', [], 0, 0, False, None
+        while True:
+            if len(_terminal_input_buffer) == 0:
+                c = os.read(read_terminal_input, 1)[0] # interruptable
+            else:
+                c = _terminal_input_buffer[0]
+                _terminal_input_buffer[:] = _terminal_input_buffer[1:]
+            buffer.append(c)
+            if utf8n > 0:
+                utf8n -= 1
+                utf8c = (utf8c << 6) | (c & 0x3F)
+                if utf8n == 0:
+                    c = utf8c
+                else:
+                    continue
+            elif (c & 0xC0) == (c & 0xC0):
+                utf8n = 0
+                while (c & 0x80) == 0x80:
+                    utf8n += 1
+                    c <<= 1
+                utf8c = (c & 0xFF) >> utf8n
+                utf8n -= 1
+                continue
+            else:
+                c = chr(c)
+            if esc > 0:
+                rc += c
+                if esc == 0:
+                    if c == '[O':
+                        esc = 1
+                    elif :
+                        break
+                elif c not in '1234567890;':
+                    break
+            else:
+                rc += c
+                esc = (c == '\033')
+    except InterruptedError:
+        rc = None
+        _terminal_input_buffer[:] = buffer
+    return rc
 
