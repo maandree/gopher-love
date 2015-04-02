@@ -26,18 +26,6 @@ from terminal import *
 
 
 
-config_file = None
-'''
-:str?  The configuration file
-'''
-
-config_opts = None
-'''
-:list<str>  Options passed to the configuration script
-'''
-
-
-
 ## Set process title
 def setproctitle(title):
     '''
@@ -73,7 +61,17 @@ def main():
     '''
     This function is called directly after the rc-file has been loaded
     '''
-    pass # TODO
+    saved_stty = None
+    try:
+        initialise_terminal()
+        hide_cursor()
+        saved_stty = store_tty_settings()
+        set_tty_settings(echo = False, isig = False, icanon = False)
+        pass # TODO
+    finally:
+        restore_tty_settings(saved_stty)
+        show_cursor()
+        uninitialise_terminal
 
 
 ## Read command line arguments
@@ -82,6 +80,7 @@ parser = ArgParser('An extensible gopher browser',
                    None, None, True, ArgParser.standard_abbreviations())
 
 parser.add_argumented(['-c', '--configurations'], 0, 'FILE', 'Select configuration file')
+parser.add_argumented(['-o', '--open'], 0, 'ADDRESS', 'Select sites to open')
 parser.add_argumentless(['-h', '-?', '--help'], 0, 'Print this help information')
 parser.add_argumentless(['-C', '--copying', '--copyright'], 0, 'Print copyright information')
 parser.add_argumentless(['-W', '--warranty'], 0, 'Print non-warranty information')
@@ -105,7 +104,20 @@ elif parser.opts['--version'] is not None:
 
 a = lambda opt : opt[0] if opt is not None else None
 config_file = a(parser.opts['--configurations'])
+'''
+:str?  The configuration file
+'''
+
 config_opts = parser.files
+'''
+:list<str>  Options passed to the configuration script
+'''
+
+a = lambda opt : opt[0] if opt is not None else []
+open_addresses = a(parser.opts['--open'])
+'''
+:list<str>  Addresses to open
+'''
 
 
 ## Load extension and configurations via gopher-loverc
