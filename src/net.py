@@ -46,8 +46,9 @@ def parse_url(url, fallback_scheme):
     @param   fallback_scheme:str  The scheme to assume the URL uses if
                                   the URL string does not contain any
     @return  :dict<str, ¿V?>      Parameters from `construct_url`, `**extras` in
-                                  `construct_url` is unioned with the other parameters,
-                                  omitted parameters are not included
+                                  `construct_url` is unioned with the other parameters.
+                                  Omitted parameters are not included. String will not
+                                  be unescaped, they will be returned in %-escaped form
     '''
     rc = {}
     scheme = fallback_scheme
