@@ -110,7 +110,8 @@ def parse_url(url, fallback_scheme):
     return rc
 
 
-def construct_url(scheme, user, password, domain, port, path, query_string, fragment_id, **extras):
+def construct_url(scheme, user = None, password = None, domain = None, port = None,
+                  path = None, query_string = None, fragment_id = None, **extras):
     '''
     Construct an URL string
     
