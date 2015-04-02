@@ -32,8 +32,15 @@ def connect(host, port, protocol = 'tcp'):
           stdin = PIPE, stdout = PIPE, stderr = PIPE)
 
 
-def punycode(address): # TODO
-    return address
+def punycode(address):
+    '''
+    Convert an IDN address to traditional limited ASCII format using punycode
+    
+    @param   address:str  The IDN address in UCS
+    @return  :str         The IDN address in punycode
+    '''
+    import encodings.punycode
+    return encodings.punycode.punycode_encode(address).rstrip('-')
 
 
 def parse_url(url, fallback_scheme):
