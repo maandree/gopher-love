@@ -21,28 +21,9 @@ import os, sys
 from argparser import *
 
 from net import *
+from config import *
 
 
-PROGRAM_NAME = 'gopher-love'
-'''
-:str  The name of the program
-'''
-
-PROGRAM_VERSION = 'devel'
-'''
-:str  The version of the program
-'''
-
-
-default_protocol = 'gopher'
-'''
-:str  The protocol to use when no protocol has been specified
-'''
-
-default_port = {'gopher' : 70}
-'''
-:dict<str, int>  The port to use for each protocol when no port has been specified
-'''
 
 config_file = None
 '''
@@ -85,6 +66,13 @@ def setproctitle(title):
     except:
         pass
 setproctitle(sys.argv[0])
+
+
+def main():
+    '''
+    This function is called directly after the rc-file has been loaded
+    '''
+    pass # TODO
 
 
 ## Read command line arguments
@@ -159,4 +147,7 @@ if config_file is not None:
     for key in l:
         g[key] = l[key]
     exec(code, g)
+
+
+main()
 
