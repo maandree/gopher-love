@@ -71,17 +71,21 @@ def restore_tty_settings(settings):
     termios.tcsetattr(sys.stdout.fileno(), termios.TCSAFLUSH, settings)
 
 
-def set_tty_settings(echo = None, isig = None, icanon = None):
+def set_tty_settings(echo = None, isig = None, icanon = None, ixany = None, ixoff = None, ixon = None):
     '''
     Change terminal settings
     
     @param  echo:bool?    Should echoing be enabled, `None` to keep unchanged
     @param  isig:bool?    Should input signals be enabled, `None` to keep unchanged
-    @param  icanon:bool?  Should input buffering be enbled, `None` to keep unchanged
+    @param  icanon:bool?  Should input buffering be enabled, `None` to keep unchanged
+    @param  ixany:bool?   Should any character restart output, `None` to keep unchanged
+    @param  ixoff:bool?   Should sending of start/stop character be enabled, `None` to keep unchanged
+    @param  ixon:bool?    Should XON/XOFF flow control be enabled, `None` to keep unchanged
     '''
+    stty = termios.tcgetattr(sys.stdout.fileno())
+    
     flags = termios.ECHO, termios.ISIG, termios.ICANON
     settings = echo, isig, icanon
-    stty = termios.tcgetattr(sys.stdout.fileno())
     turn_off, turn_on = 0, 0
     for flag, setting in zip(flags, settings):
         if setting is not None:
@@ -89,6 +93,17 @@ def set_tty_settings(echo = None, isig = None, icanon = None):
             turn_on  |= flag if setting == True  else 0
     stty[3] &= ~turn_off
     stty[3] |= turn_on
+    
+    flags = termios.IXANY, termios.IXOFF, termios.IXON
+    settings = ixany, ixoff, ixon
+    turn_off, turn_on = 0, 0
+    for flag, setting in zip(flags, settings):
+        if setting is not None:
+            turn_off |= flag if setting == False else 0
+            turn_on  |= flag if setting == True  else 0
+    stty[0] &= ~turn_off
+    stty[0] |= turn_on
+    
     termios.tcsetattr(sys.stdout.fileno(), termios.TCSAFLUSH, stty)
 
 
