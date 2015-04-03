@@ -23,6 +23,7 @@ from argparser import *
 from net import *
 from config import *
 from terminal import *
+from interface import *
 
 
 
@@ -61,17 +62,7 @@ def main():
     '''
     This function is called directly after the rc-file has been loaded
     '''
-    saved_stty = None
-    try:
-        initialise_terminal()
-        hide_cursor()
-        saved_stty = store_tty_settings()
-        set_tty_settings(echo = False, isig = False, icanon = False)
-        pass # TODO
-    finally:
-        restore_tty_settings(saved_stty)
-        show_cursor()
-        uninitialise_terminal
+    start_interface()
 
 
 ## Read command line arguments

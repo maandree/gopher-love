@@ -62,13 +62,13 @@ def store_tty_settings():
     return termios.tcgetattr(sys.stdout.fileno())
 
 
-def restore_tty_settings(setting):
+def restore_tty_settings(settings):
     '''
     Set TTY settings
     
     @param  settings:¿?  Settings in the format used in the return by `store_tty_settings`
     '''
-    return termios.tcsetattr(sys.stdout.fileno(), termios.TCSAFLUSH, settings)
+    termios.tcsetattr(sys.stdout.fileno(), termios.TCSAFLUSH, settings)
 
 
 def set_tty_settings(echo = None, isig = None, icanon = None):
@@ -123,11 +123,11 @@ def read_terminal_input():
     
     @return  :str?  The input unit, `None` if interrupted
     '''
+    rc, buffer, utf8n, utf8c, esc = '', [], 0, 0, False
     try:
-        rc, buffer, utf8n, utf8c, esc = '', [], 0, 0, False, None
         while True:
             if len(_terminal_input_buffer) == 0:
-                c = os.read(read_terminal_input, 1)[0] # interruptable
+                c = os.read(_terminal_input_fileno, 1)[0] # interruptable
             else:
                 c = _terminal_input_buffer[0]
                 _terminal_input_buffer[:] = _terminal_input_buffer[1:]
@@ -136,10 +136,10 @@ def read_terminal_input():
                 utf8n -= 1
                 utf8c = (utf8c << 6) | (c & 0x3F)
                 if utf8n == 0:
-                    c = utf8c
+                    c = chr(utf8c)
                 else:
                     continue
-            elif (c & 0xC0) == (c & 0xC0):
+            elif (c & 0xC0) == 0xC0:
                 utf8n = 0
                 while (c & 0x80) == 0x80:
                     utf8n += 1
@@ -152,17 +152,41 @@ def read_terminal_input():
             if esc > 0:
                 rc += c
                 if esc == 0:
-                    if c == '[O':
+                    if c in '[O':
                         esc = 1
-                    elif :
+                    else:
                         break
                 elif c not in '1234567890;':
+                    esc = 0
                     break
+            elif c == '\033':
+                rc += c
+                esc = 0
             else:
                 rc += c
-                esc = (c == '\033')
+                break
     except InterruptedError:
         rc = None
         _terminal_input_buffer[:] = buffer
     return rc
+
+
+def ctrl(key):
+    '''
+    Get the character sequence for a key combined with the control modifier
+    
+    @param   key:str  The key
+    @return  :str     The key with the control modifier
+    '''
+    return chr(ord(key) - ord('@'))
+
+
+def meta(key):
+    '''
+    Get the character sequence for a key combined with the meta modifier
+    
+    @param   key:str  The key
+    @return  :str     The key with the meta modifier
+    '''
+    return '\033' + key
 
