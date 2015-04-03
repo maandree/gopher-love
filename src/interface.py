@@ -31,12 +31,6 @@ def clen(string, original_len = len):
     '''
     Colour-aware object length measurement function
     
-    It is suggested to redefine `len` with this
-    function in the following way.
-    
-        len_ = len
-        len = lambda string : colour_aware_len(string, len_)
-    
     @param   string:object              The object to measure
     @param   original_len:(object)→int  The original implementation of `len`
     @return  :int                       The length of `string`
